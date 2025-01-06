@@ -1,6 +1,6 @@
 // controllers/AppointmentController.js
 
-const { Appointment, Customer, Employee, Service, Payment } = require('../models/models');
+const { Appointment, Customer, Employee, Service, Payment, Feedback } = require('../models/models');
 const { Op } = require('sequelize');
 
 class AppointmentController {
@@ -52,7 +52,7 @@ class AppointmentController {
         }
     }
 
-    // Получение всех записей (админ: все записи; клиент: свои; сотрудник: назначенные)
+    // Получение всех записей (админ: все; клиент: свои; сотрудник: назначенные)
     async findAll(req, res) {
         try {
             let appointments;
@@ -60,10 +60,13 @@ class AppointmentController {
             if (req.user.role === 'admin') {
                 appointments = await Appointment.findAll({
                     include: [
-                        { model: Customer, attributes: ['id', 'firstName', 'lastName'] },
+                        { model: Customer, attributes: ['id', 'firstName', 'lastName', 'phoneNumber'] },
                         { model: Employee, attributes: ['id', 'firstName', 'lastName'] },
                         { model: Service, attributes: ['id', 'name', 'price'] },
                         { model: Payment, attributes: ['id', 'amount', 'status'] },
+                        // Подключаем отзывы
+                        { model: Feedback },
+                        { model: Payment }, // <-- добавляем сюда
                     ],
                 });
             } else if (req.user.role === 'customer') {
@@ -73,6 +76,8 @@ class AppointmentController {
                         { model: Service, attributes: ['id', 'name', 'price'] },
                         { model: Employee, attributes: ['id', 'firstName', 'lastName'] },
                         { model: Payment, attributes: ['id', 'amount', 'status'] },
+                        // Подключаем отзывы
+                        { model: Feedback }, // <-- добавляем сюда
                     ],
                 });
             } else if (req.user.role === 'employee') {
@@ -82,6 +87,8 @@ class AppointmentController {
                         { model: Customer, attributes: ['id', 'firstName', 'lastName'] },
                         { model: Service, attributes: ['id', 'name', 'price'] },
                         { model: Payment, attributes: ['id', 'amount', 'status'] },
+                        // Подключаем отзывы
+                        { model: Feedback }, // <-- добавляем сюда
                     ],
                 });
             } else {
@@ -105,6 +112,8 @@ class AppointmentController {
                     { model: Employee, attributes: ['id', 'firstName', 'lastName'] },
                     { model: Service, attributes: ['id', 'name', 'price'] },
                     { model: Payment, attributes: ['id', 'amount', 'status'] },
+                    // Подключаем отзывы
+                    { model: Feedback }, // <-- добавляем сюда
                 ],
             });
 
@@ -116,7 +125,6 @@ class AppointmentController {
             if (req.user.role === 'customer' && appointment.customerId !== req.user.customerId) {
                 return res.status(403).json({ message: 'Нет доступа к этой записи' });
             }
-
             if (req.user.role === 'employee' && appointment.employeeId !== req.user.employeeId) {
                 return res.status(403).json({ message: 'Нет доступа к этой записи' });
             }

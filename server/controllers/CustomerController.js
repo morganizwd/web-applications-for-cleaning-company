@@ -74,13 +74,15 @@ class CustomerController {
 
             res.json({
                 token,
-                customerId: customer.id,
-                customer: {
+                user: {
                     id: customer.id,
                     login: customer.login,
                     firstName: customer.firstName,
                     lastName: customer.lastName,
-                }
+                    phoneNumber: customer.phoneNumber,
+                    address: customer.address,
+                    role: 'customer', // Явно указываем роль
+                },
             });
         } catch (error) {
             console.error('Ошибка при входе клиента:', error);
@@ -103,13 +105,14 @@ class CustomerController {
             }
 
             res.json({
-                customer: {
+                user: {
                     id: customer.id,
                     login: customer.login,
                     firstName: customer.firstName,
                     lastName: customer.lastName,
                     phoneNumber: customer.phoneNumber,
                     address: customer.address,
+                    role: 'customer',
                 },
             });
         } catch (error) {

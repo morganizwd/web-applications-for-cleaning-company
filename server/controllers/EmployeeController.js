@@ -76,14 +76,15 @@ class EmployeeController {
 
             res.json({
                 token,
-                employeeId: employee.id,
-                employee: {
+                user: {
                     id: employee.id,
                     login: employee.login,
                     firstName: employee.firstName,
                     lastName: employee.lastName,
-                    role: employee.role,
-                }
+                    phoneNumber: employee.phoneNumber,
+                    address: employee.address,
+                    role: employee.role || 'employee',
+                },
             });
         } catch (error) {
             console.error('Ошибка при входе сотрудника:', error);
@@ -106,14 +107,14 @@ class EmployeeController {
             }
 
             res.json({
-                employee: {
+                user: {
                     id: employee.id,
                     login: employee.login,
                     firstName: employee.firstName,
                     lastName: employee.lastName,
                     phoneNumber: employee.phoneNumber,
                     address: employee.address,
-                    role: employee.role,
+                    role: employee.role || 'employee',
                 },
             });
         } catch (error) {

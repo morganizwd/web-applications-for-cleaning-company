@@ -272,6 +272,25 @@ const Feedback = sequelize.define('Feedback', {
     timestamps: true,
 });
 
+// Appointment <-> Feedback
+Appointment.hasMany(Feedback, {
+    foreignKey: {
+      name: 'appointmentId',
+      allowNull: false, // Можно сделать true, если хотите разрешить feedback без appointment
+    },
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  });
+  
+  Feedback.belongsTo(Appointment, {
+    foreignKey: {
+      name: 'appointmentId',
+      allowNull: false,
+    },
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  });
+  
 // Associations
 
 // Customer <-> Appointment

@@ -80,28 +80,45 @@ class FeedbackController {
             if (req.user.role === 'admin') {
                 feedbacks = await Feedback.findAll({
                     include: [
+                        // Связываем Feedback -> Appointment -> Service
+                        {
+                            model: Appointment,
+                            attributes: ['id', 'appointmentDate', 'status'],
+                            include: [
+                                { model: Service, attributes: ['id', 'name'] },
+                            ],
+                        },
                         { model: Customer, attributes: ['id', 'firstName', 'lastName'] },
                         { model: Employee, attributes: ['id', 'firstName', 'lastName'] },
-                        { model: Appointment, attributes: ['id', 'appointmentDate', 'status'] },
-                        { model: Service, attributes: ['id', 'name'] },
                     ],
                 });
             } else if (req.user.role === 'employee') {
                 feedbacks = await Feedback.findAll({
                     where: { employeeId: req.user.employeeId },
                     include: [
+                        {
+                            model: Appointment,
+                            attributes: ['id', 'appointmentDate', 'status'],
+                            include: [
+                                { model: Service, attributes: ['id', 'name'] },
+                            ],
+                        },
                         { model: Customer, attributes: ['id', 'firstName', 'lastName'] },
-                        { model: Appointment, attributes: ['id', 'appointmentDate', 'status'] },
-                        { model: Service, attributes: ['id', 'name'] },
+                        // Можно включить Employee, но именно этот employeeId нам уже известен
                     ],
                 });
             } else if (req.user.role === 'customer') {
                 feedbacks = await Feedback.findAll({
-                    where: { customerId: req.user.customerId },
                     include: [
+                        {
+                            model: Appointment,
+                            attributes: ['id', 'appointmentDate', 'status'],
+                            include: [
+                                { model: Service, attributes: ['id', 'name'] },
+                            ],
+                        },
+                        { model: Customer, attributes: ['id', 'firstName', 'lastName'] },
                         { model: Employee, attributes: ['id', 'firstName', 'lastName'] },
-                        { model: Appointment, attributes: ['id', 'appointmentDate', 'status'] },
-                        { model: Service, attributes: ['id', 'name'] },
                     ],
                 });
             } else {

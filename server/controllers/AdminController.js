@@ -66,12 +66,11 @@ class AdminController {
 
             res.json({
                 token,
-                adminId: admin.id,
-                admin: {
+                user: {
                     id: admin.id,
                     login: admin.login,
-                    role: 'admin',
-                }
+                    role: 'admin', // Явно указываем роль
+                },
             });
         } catch (error) {
             console.error('Ошибка при входе администратора:', error);
@@ -94,7 +93,7 @@ class AdminController {
             }
 
             res.json({
-                admin: {
+                user: {
                     id: admin.id,
                     login: admin.login,
                     role: 'admin',

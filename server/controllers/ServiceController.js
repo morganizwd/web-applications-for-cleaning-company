@@ -1,12 +1,14 @@
 // controllers/ServiceController.js
-
 const { Service } = require('../models/models');
+const path = require('path');
+const fs = require('fs');
 
 class ServiceController {
     // Создание новой услуги (доступно только администраторам)
     async create(req, res) {
         try {
-            const { name, description, price, duration, photo } = req.body;
+            const { name, description, price, duration } = req.body;
+            let photoPath = null;
 
             if (!name || !price || !duration) {
                 return res.status(400).json({ message: 'Необходимы название, цена и продолжительность услуги' });
@@ -17,12 +19,17 @@ class ServiceController {
                 return res.status(400).json({ message: 'Услуга с таким названием уже существует' });
             }
 
+            if (req.file) {
+                // Сохранение пути к изображению
+                photoPath = `/uploads/${req.file.filename}`;
+            }
+
             const service = await Service.create({
                 name,
                 description,
                 price,
                 duration,
-                photo,
+                photo: photoPath,
             });
 
             res.status(201).json({
@@ -73,7 +80,7 @@ class ServiceController {
     // Обновление услуги (доступно только администраторам)
     async update(req, res) {
         try {
-            const { name, description, price, duration, photo } = req.body;
+            const { name, description, price, duration } = req.body;
             const serviceId = req.params.id;
 
             const service = await Service.findByPk(serviceId);
@@ -94,7 +101,20 @@ class ServiceController {
             if (description) service.description = description;
             if (price) service.price = price;
             if (duration) service.duration = duration;
-            if (photo) service.photo = photo;
+
+            if (req.file) {
+                // Удаление старого файла, если он существует
+                if (service.photo) {
+                    const oldPhotoPath = path.join(__dirname, '..', service.photo);
+                    fs.unlink(oldPhotoPath, (err) => {
+                        if (err) {
+                            console.error('Ошибка при удалении старого фото:', err);
+                        }
+                    });
+                }
+                // Сохранение пути к новому изображению
+                service.photo = `/uploads/${req.file.filename}`;
+            }
 
             await service.save();
 
@@ -122,6 +142,16 @@ class ServiceController {
             const service = await Service.findByPk(serviceId);
             if (!service) {
                 return res.status(404).json({ message: 'Услуга не найдена' });
+            }
+
+            // Удаление файла фотографии, если он существует
+            if (service.photo) {
+                const photoPath = path.join(__dirname, '..', service.photo);
+                fs.unlink(photoPath, (err) => {
+                    if (err) {
+                        console.error('Ошибка при удалении фото:', err);
+                    }
+                });
             }
 
             await service.destroy();
